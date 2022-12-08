@@ -25,7 +25,7 @@ class SiimDataset(Dataset):
         img_path = os.path.join(self.root_dir, 'train', data.id + '.jpg')
         image = cv2.imread(img_path)
         landmarks = data.label.strip('[]').split(', ')
-        landmarks = np.array(landmarks).astype(np.float)
+        landmarks = np.array(landmarks).astype(int)
         landmarks = torch.from_numpy(landmarks)
         
         if self.transform:

@@ -24,8 +24,8 @@ warnings.filterwarnings("ignore")
     
     
 fold = 1
-train_batch_size = 8
-valid_batch_size = 16
+train_batch_size = 4
+valid_batch_size = 4
 start_lr   = 1e-4
 num_iteration = 12000
 iter_log    = 10
@@ -43,7 +43,7 @@ def create_siim_dataloader(meta_csv_path='./jpg_form/meta.csv'):
     train_df = jpg_df.loc[jpg_df['split'] == 'train']
     
     train_transform = A.Compose([
-        A.RandomCrop(width=512, height=512),
+        A.RandomCrop(width=224, height=224),
         A.HorizontalFlip(p=0.5),
         A.VerticalFlip(),
         A.GaussNoise(var_limit=(10.0, 50.0), mean=0),
@@ -55,6 +55,7 @@ def create_siim_dataloader(meta_csv_path='./jpg_form/meta.csv'):
     ])
     
     valid_transform = A.Compose([
+        A.RandomCrop(width=224, height=224),
         A.Normalize(mean=[0.5, 0.5, 0.5],std=[0.225, 0.225, 0.225]),
         ToTensorV2()
     ])
@@ -70,7 +71,7 @@ def create_siim_dataloader(meta_csv_path='./jpg_form/meta.csv'):
         sampler=RandomSampler(train_dataset),
         batch_size=train_batch_size,
         drop_last=True,
-        num_workers=4,
+        # num_workers=4,
         pin_memory=True,
         worker_init_fn=lambda id: np.random.seed(torch.initial_seed() // 2 ** 32 + id)
     )
@@ -79,8 +80,8 @@ def create_siim_dataloader(meta_csv_path='./jpg_form/meta.csv'):
         valid_dataset,
         sampler = SequentialSampler(valid_dataset),
         batch_size  = valid_batch_size,
-        drop_last   = False,
-        num_workers = 4,
+        drop_last   = True,
+        # num_workers = 4,
         pin_memory  = True
     )
     
@@ -89,10 +90,11 @@ def create_siim_dataloader(meta_csv_path='./jpg_form/meta.csv'):
         sampler = SequentialSampler(valid_dataset),
         batch_size  = valid_batch_size,
         drop_last   = False,
-        num_workers = 4,
+        # num_workers = 4,
         pin_memory  = True
     )
         
+    return train_loader, valid_loader, test_loader
     return train_loader, valid_loader, test_loader
     
 

@@ -1,31 +1,8 @@
 # -*- coding: utf-8 -*-
-
-
-import numpy as np  # linear algebra
-import pandas as pd  # data processing, CSV file I/O (e.g. pd.read_csv)
-import os
-
-import torch
-import torchvision
-from torchvision import datasets
-from torchvision import transforms as T  # for simplifying the transforms
 from torch import nn, optim
-from torch.nn import functional as F
-from torch.utils.data import DataLoader, sampler, random_split
-from torchvision import models
-
-import timm
 from timm.loss import LabelSmoothingCrossEntropy  # This is better than normal nn.CrossEntropyLoss
-
 import warnings
-
 warnings.filterwarnings("ignore")
-
-# Commented out IPython magic to ensure Python compatibility.
-import matplotlib.pyplot as plt
-# %matplotlib inline
-
-import sys
 from tqdm import tqdm
 import time
 import copy
@@ -39,12 +16,11 @@ dataloaders = {
     "val": valid_loader
 }
 dataset_sizes = {
-    "train": 4980,
-    "val": 1247
+    "train": len(train_loader),
+    "val": len(valid_loader)
 }
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-device
 
 HUB_URL = "SharanSMenon/swin-transformer-hub:main"
 MODEL_NAME = "swin_tiny_patch4_window7_224"
@@ -80,11 +56,11 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=10):
         print(f'Epoch {epoch}/{num_epochs - 1}')
         print("-" * 10)
 
-        for phase in ['train', 'val']:  # We do training and validation phase per epoch
+        for phase in ['train', 'val']:
             if phase == 'train':
-                model.train()  # model to training mode
+                model.train()
             else:
-                model.eval()  # model to evaluate
+                model.eval()
 
             running_loss = 0.0
             running_corrects = 0.0
@@ -95,9 +71,9 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=10):
 
                 optimizer.zero_grad()
 
-                with torch.set_grad_enabled(phase == 'train'):  # no autograd makes validation go faster
+                with torch.set_grad_enabled(phase == 'train'):
                     outputs = model(inputs)
-                    _, preds = torch.max(outputs, 1)  # used for accuracy
+                    _, preds = torch.max(outputs, 1)
                     loss = criterion(outputs, labels)
 
                     if phase == 'train':
@@ -126,4 +102,4 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=10):
     return model
 
 if __name__ == '__main__':
-    model_ft = train_model(model, criterion, optimizer, exp_lr_scheduler, num_epochs=4)
+    model_ft = train_model(model, criterion, optimizer, exp_lr_scheduler, num_epochs=100)
